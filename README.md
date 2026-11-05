@@ -1,42 +1,232 @@
-# Inventory Management System MERN CRUD App
+# Inventory Management System
 
-A simple MERN project that lets the user insert, update, delete & get products from the MongoDB.
+A full-stack **MERN** web application for managing product inventory. Users can add, view, update and delete products, with all data stored in a cloud-hosted MongoDB Atlas database.
 
-## To Run App:
+| | Link |
+|---|---|
+| **Live app (Frontend)** | https://inventory-management-system-two-murex.vercel.app/ |
+| **Live API (Backend)** | https://inventory-management-system-gyj2.onrender.com |
 
-### 1. Open the folder in vs code and run (npm install) command.
-   
-### 2. In MongoDB Compass:
-   - Create Database: IMS
-   - Collection Name: products
+> The backend runs on Render's free tier, so the first request after a period of inactivity can take up to a minute while the server wakes up.
 
-### 3. Then in vs code, open two terminals in split:
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/86ed0828-84b8-43b0-89fd-8caa17b88833)
+---
 
-### 4. In one terminal run these commands (For Backend / Server):
-   - cd Backend
-   - npm run server
+## Screenshots
 
-### 5. In the other terminal run these commands (For Frontend / Client):
-   - cd Frontend
-   - cd inventory_management_system
-   - npm start
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/93fa528b-bc88-49c2-9922-19b317336b7c)
+**Home**
 
-## Output:
-### 1. GET (Displaying products)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/09f7d43a-344b-4122-b415-b3736307cf45)
+![Home page](screenshots/home.png)
 
-### 2. POST (Inserting a new product)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/d31e9f36-c119-4a04-9cc0-ddc9fe94b159)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/39ec387f-5efc-4c1f-a7eb-a87612acc17a)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/a6b5c6bf-77d7-41ab-9ca0-3a8bfc71954d)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/3d43e877-c2e6-414b-bef9-410caae1668e)
+**Products inventory**
 
-### 3. PUT (Updating a product)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/d35f7ab0-3fda-4b1c-9055-67ca8c7b2ab6)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/7dd107db-6fde-416d-b5c6-2175916f872f)
+![Products page](screenshots/products.png)
 
-### 4. DELETE (Deleting a product)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/d846ff43-6abd-4baa-9ed6-df736f2d411e)
-   ![image](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-Project/assets/99351091/cc6368bd-f391-4d6b-b814-c931d48a0878)
+**About**
+
+![About page](screenshots/about.png)
+
+---
+
+## Features
+
+- Create new products (name, price, barcode)
+- View all products in a table
+- Update an existing product
+- Delete a product
+- Responsive Bootstrap interface
+- Data stored persistently in MongoDB Atlas
+- Frontend and backend deployed independently
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | JavaScript (ES6+) |
+| Frontend | React 18, React Router v6, Bootstrap 5, Font Awesome |
+| Backend | Node.js, Express.js |
+| Database | MongoDB Atlas, with Mongoose ODM |
+| Tools | Postman or browser for API testing, MongoDB Compass for viewing data |
+| Hosting | Vercel (frontend), Render (backend), MongoDB Atlas (database) |
+
+---
+
+## Architecture and Web Flow
+
+```
+┌──────────────┐    HTTPS (JSON)    ┌──────────────────┐    Mongoose    ┌─────────────────┐
+│   Browser    │ ─────────────────► │  Express API     │ ─────────────► │  MongoDB Atlas  │
+│  React App   │ ◄───────────────── │  (Node.js)       │ ◄───────────── │  (IMS database) │
+│  on Vercel   │                    │  on Render       │                │                 │
+└──────────────┘                    └──────────────────┘                └─────────────────┘
+```
+
+**How a request flows**
+
+1. The user opens the React app (served by Vercel) and interacts with a page, for example by clicking **Add New Product**.
+2. The React component sends an HTTP request using `fetch` to the backend URL stored in the `REACT_APP_API_URL` environment variable.
+3. The Express server on Render receives the request, and the matching route handler runs.
+4. The handler uses a Mongoose model to read or write data in MongoDB Atlas.
+5. The database result goes back through Express as a JSON response.
+6. React receives the response and updates the page.
+
+CORS is enabled on the backend so the Vercel-hosted frontend is allowed to call the Render-hosted API.
+
+---
+
+## Project Structure
+
+```
+.
+├── Backend/
+│   ├── index.js          # Express server entry point
+│   ├── db.js             # MongoDB Atlas connection
+│   ├── Models/
+│   │   └── Products.js   # Mongoose schema
+│   ├── Routes/
+│   │   └── router.js     # API routes
+│   └── package.json
+│
+└── Frontend/
+    └── inventory_management_system/
+        ├── public/
+        └── src/
+            ├── App.js            # Routes and layout
+            ├── config.js         # API base URL
+            └── components/
+                ├── Navbar.js
+                ├── Home.js
+                ├── About.js
+                ├── Products.js        # List and delete
+                ├── InsertProduct.js   # Add form
+                └── UpdateProduct.js   # Edit form
+```
+
+---
+
+## Data Model
+
+**Products** collection:
+
+| Field | Type | Required |
+|---|---|---|
+| `ProductName` | String | Yes |
+| `ProductPrice` | Number | Yes |
+| `ProductBarcode` | Number | Yes |
+
+---
+
+## API Endpoints
+
+Base URL: `https://inventory-management-system-gyj2.onrender.com`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/products` | Get all products |
+| `GET` | `/products/:id` | Get one product by ID |
+| `POST` | `/insertproduct` | Add a new product |
+| `PUT` | `/updateproduct/:id` | Update a product |
+| `DELETE` | `/deleteproduct/:id` | Delete a product |
+
+**Example request body** (`POST /insertproduct`):
+
+```json
+{
+  "ProductName": "Socks",
+  "ProductPrice": 80,
+  "ProductBarcode": 8514
+}
+```
+
+---
+
+## Running Locally
+
+### Prerequisites
+
+- Node.js (v16 or later) and npm
+- A free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster and its connection string
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repo-url>
+cd <your-repo-folder>
+```
+
+### 2. Set up the backend
+
+```bash
+cd Backend
+npm install
+```
+
+Create a file named `.env` inside `Backend/`:
+
+```
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/IMS?retryWrites=true&w=majority
+```
+
+Start the server:
+
+```bash
+npm run server
+```
+
+The API runs on `http://localhost:3001`.
+
+### 3. Set up the frontend
+
+Open a second terminal:
+
+```bash
+cd Frontend/inventory_management_system
+npm install
+npm start
+```
+
+The app opens at `http://localhost:3000`. By default it talks to `http://localhost:3001`. To point it at a different backend, create `Frontend/inventory_management_system/.env`:
+
+```
+REACT_APP_API_URL=https://your-backend-url.onrender.com
+```
+
+Restart `npm start` after changing it.
+
+---
+
+## Deployment
+
+| Part | Platform | Key settings |
+|---|---|---|
+| Database | MongoDB Atlas | Database user created, network access allows Render's servers |
+| Backend | Render (Web Service) | Root directory `Backend`, build `npm install`, start `npm start`, env var `MONGO_URI` |
+| Frontend | Vercel | Root directory `Frontend/inventory_management_system`, env var `REACT_APP_API_URL` set to the Render URL |
+
+---
+
+## Environment Variables
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `MONGO_URI` | Backend | MongoDB Atlas connection string |
+| `PORT` | Backend | Provided automatically by Render |
+| `REACT_APP_API_URL` | Frontend | Base URL of the backend API |
+
+Never commit `.env` files. They are listed in `.gitignore`.
+
+---
+
+## Future Improvements
+
+- Working search and filtering on the products table
+- User authentication
+- Stock quantity and low-stock alerts
+- Input validation and clearer error messages
+
+---
+
+## Acknowledgements
+
+Based on the open-source [Inventory-Management-System-MERN-CRUD-App](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-App) by mhy20401, customized and deployed by me.
