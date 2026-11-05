@@ -214,7 +214,6 @@ Restart `npm start` after changing it.
 | `PORT` | Backend | Provided automatically by Render |
 | `REACT_APP_API_URL` | Frontend | Base URL of the backend API |
 
-Never commit `.env` files. They are listed in `.gitignore`.
 
 ---
 
@@ -225,8 +224,3 @@ Never commit `.env` files. They are listed in `.gitignore`.
 - Stock quantity and low-stock alerts
 - Input validation and clearer error messages
 
----
-
-## Acknowledgements
-
-Based on the open-source [Inventory-Management-System-MERN-CRUD-App](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-App) by mhy20401, customized and deployed by me.
