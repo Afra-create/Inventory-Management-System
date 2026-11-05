@@ -1,41 +1,57 @@
 # Inventory Management System
 
-A full-stack **MERN** web application for managing product inventory. Users can add, view, update and delete products, with all data stored in a cloud-hosted MongoDB Atlas database.
+A production-ready full-stack **MERN** (MongoDB, Express, React, Node.js) web application for managing personal and business product inventories. Featuring **JWT user authentication**, **per-user inventory isolation**, **real-time product search**, and complete **CRUD operations**, with data persistently hosted in a cloud **MongoDB Atlas** cluster.
 
 | | Link |
 |---|---|
-| **Live app (Frontend)** | https://inventory-management-system-two-murex.vercel.app/ |
+| **Live App (Frontend)** | https://inventory-management-system-two-murex.vercel.app/ |
 | **Live API (Backend)** | https://inventory-management-system-gyj2.onrender.com |
 
-> The backend runs on Render's free tier, so the first request after a period of inactivity can take up to a minute while the server wakes up.
+> **Note**: The backend is hosted on Render's free tier. If the service has been idle, the first request may take ~30–50 seconds while the server spins up.
 
 ---
 
 ## Screenshots
 
-**Home**
+### Home Page
+Welcome dashboard with navigation and quick access to inventory management.
 
-![Home page](screenshots/home.png)
+![Home Page](screenshots/home.png)
 
-**Products inventory**
+### Products Inventory & Search
+Private inventory table showing real-time product list, live search filtering, update/delete controls, and quick-add actions.
 
-![Products page](screenshots/products.png)
+![Products Page](screenshots/products.png)
 
-**About**
+### About Page
+Overview of system features, architecture, and technology stack.
 
-![About page](screenshots/about.png)
+![About Page](screenshots/about.png)
 
 ---
 
-## Features
+## Key Features
 
-- Create new products (name, price, barcode)
-- View all products in a table
-- Update an existing product
-- Delete a product
-- Responsive Bootstrap interface
-- Data stored persistently in MongoDB Atlas
-- Frontend and backend deployed independently
+- **User Authentication & Authorization**:
+  - Secure registration and login powered by **JSON Web Tokens (JWT)**.
+  - Password encryption using **bcryptjs** (salt factor 10).
+  - Protected client routes and middleware-enforced API security.
+- **Per-User Inventory Isolation**:
+  - Each registered user has a private inventory dashboard.
+  - Strict database-level scoping ensures users can only view, edit, search, and delete their own products.
+- **Real-Time Product Search**:
+  - Instant search filtering by **Product Name** (case-insensitive regex) and **Product Barcode**.
+  - One-click clear search with active query feedback.
+- **Full CRUD Management**:
+  - **Create**: Add new items with Name, Price, and Barcode.
+  - **Read**: View structured inventory tables with automatic empty/loading states.
+  - **Update**: Pre-filled editing forms to update existing stock details.
+  - **Delete**: Quick item deletion with confirmation.
+- **Resilient Architecture**:
+  - Offline in-memory fallback support so local development never freezes if cloud connections are blocked.
+  - Unified error handling with clear on-screen alerts and loading spinners.
+- **Responsive UI**:
+  - Built with **Bootstrap 5** and **Font Awesome** for a seamless mobile and desktop experience.
 
 ---
 
@@ -43,35 +59,31 @@ A full-stack **MERN** web application for managing product inventory. Users can 
 
 | Layer | Technology |
 |---|---|
-| Language | JavaScript (ES6+) |
-| Frontend | React 18, React Router v6, Bootstrap 5, Font Awesome |
-| Backend | Node.js, Express.js |
-| Database | MongoDB Atlas, with Mongoose ODM |
-| Tools | Postman or browser for API testing, MongoDB Compass for viewing data |
-| Hosting | Vercel (frontend), Render (backend), MongoDB Atlas (database) |
+| **Frontend** | React 18, React Router v6, Bootstrap 5, Font Awesome, HTML5, CSS3 |
+| **Backend** | Node.js, Express.js |
+| **Authentication** | JSON Web Tokens (JWT), bcryptjs |
+| **Database** | MongoDB Atlas, Mongoose ODM |
+| **Hosting** | Vercel (Frontend), Render (Backend), MongoDB Atlas (Database) |
 
 ---
 
-## Architecture and Web Flow
+## Architecture & Request Flow
 
 ```
-┌──────────────┐    HTTPS (JSON)    ┌──────────────────┐    Mongoose    ┌─────────────────┐
-│   Browser    │ ─────────────────► │  Express API     │ ─────────────► │  MongoDB Atlas  │
-│  React App   │ ◄───────────────── │  (Node.js)       │ ◄───────────── │  (IMS database) │
-│  on Vercel   │                    │  on Render       │                │                 │
-└──────────────┘                    └──────────────────┘                └─────────────────┘
+┌─────────────────┐       HTTPS / JSON       ┌────────────────────────┐       Mongoose       ┌──────────────────────┐
+│  React Browser  │ ───────────────────────► │   Express.js API       │ ───────────────────► │   MongoDB Atlas      │
+│   (on Vercel)   │ ◄─────────────────────── │   (on Render)          │ ◄─────────────────── │   (Cloud Database)   │
+└─────────────────┘                          └────────────────────────┘                      └──────────────────────┘
+        │                                                │
+   Stores JWT in                                  Verifies JWT via
+    localStorage                                  fetchUser middleware
 ```
 
-**How a request flows**
-
-1. The user opens the React app (served by Vercel) and interacts with a page, for example by clicking **Add New Product**.
-2. The React component sends an HTTP request using `fetch` to the backend URL stored in the `REACT_APP_API_URL` environment variable.
-3. The Express server on Render receives the request, and the matching route handler runs.
-4. The handler uses a Mongoose model to read or write data in MongoDB Atlas.
-5. The database result goes back through Express as a JSON response.
-6. React receives the response and updates the page.
-
-CORS is enabled on the backend so the Vercel-hosted frontend is allowed to call the Render-hosted API.
+1. **Authentication**: The user signs up or logs in. The backend verifies credentials, signs a JWT token, and returns user details. The token is stored in the browser's `localStorage`.
+2. **Authorized API Calls**: For any inventory operation, the React app sends an HTTP request with `Authorization: Bearer <token>`.
+3. **Middleware Verification**: Express passes the request through `fetchUser` middleware, decoding `req.user.id`.
+4. **Data Scoping**: Mongoose queries are strictly filtered by `{ userId: req.user.id }`.
+5. **UI Update**: React updates component state and displays the user's isolated inventory.
 
 ---
 
@@ -80,147 +92,136 @@ CORS is enabled on the backend so the Vercel-hosted frontend is allowed to call 
 ```
 .
 ├── Backend/
-│   ├── index.js          # Express server entry point
-│   ├── db.js             # MongoDB Atlas connection
+│   ├── index.js                  # Express server entry point & middleware
+│   ├── db.js                     # MongoDB Atlas connection & error handlers
+│   ├── middleware/
+│   │   └── fetchUser.js          # JWT authentication middleware
 │   ├── Models/
-│   │   └── Products.js   # Mongoose schema
+│   │   ├── Users.js              # User schema (name, email, password, date)
+│   │   └── Products.js           # Product schema (userId, name, price, barcode)
 │   ├── Routes/
-│   │   └── router.js     # API routes
+│   │   ├── auth.js               # Auth routes (register, login, getuser)
+│   │   └── router.js             # Inventory CRUD & search routes
 │   └── package.json
 │
-└── Frontend/
-    └── inventory_management_system/
-        ├── public/
-        └── src/
-            ├── App.js            # Routes and layout
-            ├── config.js         # API base URL
-            └── components/
-                ├── Navbar.js
-                ├── Home.js
-                ├── About.js
-                ├── Products.js        # List and delete
-                ├── InsertProduct.js   # Add form
-                └── UpdateProduct.js   # Edit form
+├── Frontend/
+│   └── inventory_management_system/
+│       ├── public/               # Static assets & index.html
+│       ├── vercel.json           # SPA rewrites for Vercel
+│       └── src/
+│           ├── App.js            # Router configuration & routes
+│           ├── config.js         # API base URL resolution
+│           └── components/
+│               ├── Navbar.js     # Responsive nav with auth state & search
+│               ├── Home.js       # Welcome landing page
+│               ├── Login.js      # Sign-in form
+│               ├── Register.js   # Sign-up form
+│               ├── Products.js   # Inventory table & live search
+│               ├── InsertProduct.js # Add product form
+│               ├── UpdateProduct.js # Edit product form
+│               └── About.js      # App overview
+│
+└── screenshots/                  # Documentation images
+    ├── home.png
+    ├── products.png
+    └── about.png
 ```
 
 ---
 
-## Data Model
+## Data Models
 
-**Products** collection:
-
-| Field | Type | Required |
+### 1. Users Schema (`Backend/Models/Users.js`)
+| Field | Type | Description |
 |---|---|---|
-| `ProductName` | String | Yes |
-| `ProductPrice` | Number | Yes |
-| `ProductBarcode` | Number | Yes |
+| `name` | String | User's full name (required) |
+| `email` | String | Unique email address (required, lowercase, indexed) |
+| `password` | String | Hashed password via bcryptjs (required) |
+| `date` | Date | Account creation timestamp (default: `Date.now`) |
+
+### 2. Products Schema (`Backend/Models/Products.js`)
+| Field | Type | Description |
+|---|---|---|
+| `userId` | ObjectId | Reference to `Users` model for ownership |
+| `ProductName` | String | Product title / description (required) |
+| `ProductPrice` | Number | Unit price (required) |
+| `ProductBarcode` | Number | Barcode number (required) |
+| `timestamps` | Date | Created / updated timestamps |
 
 ---
 
 ## API Endpoints
 
-Base URL: `https://inventory-management-system-gyj2.onrender.com`
+**Base URL**: `https://inventory-management-system-gyj2.onrender.com`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/products` | Get all products |
-| `GET` | `/products/:id` | Get one product by ID |
-| `POST` | `/insertproduct` | Add a new product |
-| `PUT` | `/updateproduct/:id` | Update a product |
-| `DELETE` | `/deleteproduct/:id` | Delete a product |
+### Authentication Routes
+| Method | Endpoint | Auth Required | Description |
+|---|---|---|---|
+| `POST` | `/auth/register` | No | Register a new user and receive JWT |
+| `POST` | `/auth/login` | No | Authenticate user and receive JWT |
+| `GET` | `/auth/getuser` | Yes (`Bearer <token>`) | Get logged-in user profile |
 
-**Example request body** (`POST /insertproduct`):
-
-```json
-{
-  "ProductName": "Socks",
-  "ProductPrice": 80,
-  "ProductBarcode": 8514
-}
-```
+### Inventory Routes
+| Method | Endpoint | Auth Required | Description |
+|---|---|---|---|
+| `GET` | `/products` | Yes (`Bearer <token>`) | Get user's products (supports `?search=<term>`) |
+| `GET` | `/products/:id` | Yes (`Bearer <token>`) | Get specific product by ID |
+| `POST` | `/insertproduct` | Yes (`Bearer <token>`) | Add product to user's inventory |
+| `PUT` | `/updateproduct/:id` | Yes (`Bearer <token>`) | Update product owned by user |
+| `DELETE`| `/deleteproduct/:id` | Yes (`Bearer <token>`) | Delete product owned by user |
+| `GET` | `/search/:key` | Yes (`Bearer <token>`) | Search user's inventory by name or barcode |
 
 ---
 
 ## Running Locally
 
 ### Prerequisites
-
-- Node.js (v16 or later) and npm
-- A free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster and its connection string
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [npm](https://www.npmjs.com/)
+- A free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster
 
 ### 1. Clone the repository
-
 ```bash
-git clone <your-repo-url>
-cd <your-repo-folder>
+git clone https://github.com/Afra-create/Inventory-Management-System.git
+cd Inventory-Management-System
 ```
 
-### 2. Set up the backend
-
+### 2. Backend Setup
 ```bash
 cd Backend
 npm install
 ```
 
-Create a file named `.env` inside `Backend/`:
-
+Create a `.env` file in `Backend/`:
+```env
+Mongo_url=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/IMS?retryWrites=true&w=majority
+PORT=3001
+JWT_SECRET=your_jwt_secret_key
 ```
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/IMS?retryWrites=true&w=majority
-```
 
-Start the server:
-
+Start the backend:
 ```bash
+npm start
+# or with nodemon auto-reload:
 npm run server
 ```
+*Backend runs on `http://localhost:3001`.*
 
-The API runs on `http://localhost:3001`.
-
-### 3. Set up the frontend
-
-Open a second terminal:
-
+### 3. Frontend Setup
+In a new terminal:
 ```bash
 cd Frontend/inventory_management_system
 npm install
 npm start
 ```
-
-The app opens at `http://localhost:3000`. By default it talks to `http://localhost:3001`. To point it at a different backend, create `Frontend/inventory_management_system/.env`:
-
-```
-REACT_APP_API_URL=https://your-backend-url.onrender.com
-```
-
-Restart `npm start` after changing it.
+*Frontend runs on `http://localhost:3000`.*
 
 ---
 
-## Deployment
+## Deployment Configuration
 
-| Part | Platform | Key settings |
+| Component | Platform | Configuration Details |
 |---|---|---|
-| Database | MongoDB Atlas | Database user created, network access allows Render's servers |
-| Backend | Render (Web Service) | Root directory `Backend`, build `npm install`, start `npm start`, env var `MONGO_URI` |
-| Frontend | Vercel | Root directory `Frontend/inventory_management_system`, env var `REACT_APP_API_URL` set to the Render URL |
-
----
-
-## Environment Variables
-
-| Variable | Where | Purpose |
-|---|---|---|
-| `MONGO_URI` | Backend | MongoDB Atlas connection string |
-| `PORT` | Backend | Provided automatically by Render |
-| `REACT_APP_API_URL` | Frontend | Base URL of the backend API |
-
-
----
-
-## Future Improvements
-
-- Working search and filtering on the products table
-- User authentication
-- Stock quantity and low-stock alerts
-- Input validation and clearer error messages
-
+| **Database** | MongoDB Atlas | Cluster created, network access IP whitelisted (`0.0.0.0/0`), user credentials configured. |
+| **Backend** | Render | Root Directory: `Backend`<br>Build Command: `npm install`<br>Start Command: `npm start`<br>Environment Variables: `Mongo_url`, `JWT_SECRET`. |
+| **Frontend** | Vercel | Root Directory: `Frontend/inventory_management_system`<br>Build Command: `npm run build`<br>Output Directory: `build`<br>Environment Variable: `REACT_APP_API_URL` pointing to Render API. |
