@@ -1,6 +1,6 @@
 # Inventory Management System
 
-A production-ready full-stack **MERN** (MongoDB, Express, React, Node.js) web application for managing personal and business product inventories. Featuring **JWT user authentication**, **per-user inventory isolation**, **real-time product search**, and complete **CRUD operations**, with data persistently hosted in a cloud **MongoDB Atlas** cluster.
+A full-stack **MERN** (MongoDB, Express, React, Node.js) web application for managing personal and business product inventories. Featuring **JWT user authentication**, **per-user inventory isolation**, **real-time product search**, and complete **CRUD operations**, with data persistently hosted in a cloud **MongoDB Atlas** cluster.
 
 | | Link |
 |---|---|
@@ -13,20 +13,25 @@ A production-ready full-stack **MERN** (MongoDB, Express, React, Node.js) web ap
 
 ## Screenshots
 
-### Home Page
-Welcome dashboard with navigation and quick access to inventory management.
+### Landing Page (logged out)
+Visitors see a welcome page with **Sign In** and **Register** options. Inventory pages are only available after logging in.
 
-![Home Page](screenshots/home.png)
+![Landing page](screenshots/home-logged-out.png)
 
-### Products Inventory & Search
-Private inventory table showing real-time product list, live search filtering, update/delete controls, and quick-add actions.
+### Home Page (logged in)
+After signing in, the navbar shows the user's name, a **Logout** button and the inventory search bar, with quick links to the user's products.
 
-![Products Page](screenshots/products.png)
+![Home page](screenshots/home.png)
+
+### Products Inventory
+The user's private inventory table with search, **+ Add New Product**, and update/delete controls. A new account starts with an empty inventory, as shown here.
+
+![Products page](screenshots/products.png)
 
 ### About Page
-Overview of system features, architecture, and technology stack.
+Project overview page.
 
-![About Page](screenshots/about.png)
+![About page](screenshots/about.png)
 
 ---
 
@@ -122,6 +127,7 @@ Overview of system features, architecture, and technology stack.
 │               └── About.js      # App overview
 │
 └── screenshots/                  # Documentation images
+    ├── home-logged-out.png
     ├── home.png
     ├── products.png
     └── about.png
@@ -225,3 +231,9 @@ npm start
 | **Database** | MongoDB Atlas | Cluster created, network access IP whitelisted (`0.0.0.0/0`), user credentials configured. |
 | **Backend** | Render | Root Directory: `Backend`<br>Build Command: `npm install`<br>Start Command: `npm start`<br>Environment Variables: `Mongo_url`, `JWT_SECRET`. |
 | **Frontend** | Vercel | Root Directory: `Frontend/inventory_management_system`<br>Build Command: `npm run build`<br>Output Directory: `build`<br>Environment Variable: `REACT_APP_API_URL` pointing to Render API. |
+
+---
+
+## Acknowledgements
+
+Built on top of the open-source [Inventory-Management-System-MERN-CRUD-App](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-App) by mhy20401, which provided the basic product CRUD starter. I extended it with JWT authentication, per-user inventory isolation, product search, UI changes and full cloud deployment.
