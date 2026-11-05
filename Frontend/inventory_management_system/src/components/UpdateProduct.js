@@ -2,38 +2,40 @@ import React, { useEffect, useState } from 'react'
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 
-export default function InsertProduct() {
+export default function UpdateProduct() {
     const [productName, setProductName] = useState("");
     const [productPrice, setProductPrice] = useState();
     const [productBarcode, setProductBarcode] = useState();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const navigate = useNavigate("");
+    const navigate = useNavigate();
+    const { id } = useParams();
 
-    const setName = (e) => {
-        setProductName(e.target.value);
-      };
-    
-      const setPrice = (e) => {
-        setProductPrice(e.target.value);
-      };
-    
-      const setBarcode = (e) => {
-        const value = e.target.value.slice(0, 12);
-        setProductBarcode(value);
-    };
-
-    const {id} = useParams("");
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
         const getProduct = async () => {
           try {
             const res = await fetch(`${API_URL}/products/${id}`, {
               method: "GET",
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
               }
             });
+
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.dispatchEvent(new Event('authChange'));
+                navigate('/login');
+                return;
+            }
       
             const data = await res.json();
       
@@ -43,15 +45,29 @@ export default function InsertProduct() {
               setProductPrice(data.ProductPrice);
               setProductBarcode(data.ProductBarcode);
             } else {
-              console.log("Something went wrong. Please try again.");
+              setError(data.error || "Something went wrong. Please try again.");
             }
           } catch (err) {
             console.log(err);
+            setError("Could not retrieve product details.");
           }
         };
       
         getProduct();
-    }, [id]);
+    }, [id, token, navigate]);
+
+    const setName = (e) => {
+        setProductName(e.target.value);
+    };
+    
+    const setPrice = (e) => {
+        setProductPrice(e.target.value);
+    };
+    
+    const setBarcode = (e) => {
+        const value = e.target.value.slice(0, 12);
+        setProductBarcode(value);
+    };
 
     const updateProduct = async (e) => {
         e.preventDefault();
@@ -68,10 +84,19 @@ export default function InsertProduct() {
             const response = await fetch(`${API_URL}/updateproduct/${id}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({ "ProductName": productName, "ProductPrice": productPrice, "ProductBarcode": productBarcode })
             });
+
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.dispatchEvent(new Event('authChange'));
+                navigate('/login');
+                return;
+            }
 
             const data = await response.json();
 

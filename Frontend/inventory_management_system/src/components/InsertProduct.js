@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 
@@ -8,7 +8,15 @@ export default function InsertProduct() {
     const [productBarcode, setProductBarcode] = useState();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const navigate = useNavigate("");
+    const navigate = useNavigate();
+
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        if (!token) {
+            navigate('/login');
+        }
+    }, [token, navigate]);
 
     const setName = (e) => {
         setProductName(e.target.value);
@@ -38,10 +46,19 @@ export default function InsertProduct() {
             const res = await fetch(`${API_URL}/insertproduct`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({ "ProductName": productName, "ProductPrice": productPrice, "ProductBarcode": productBarcode })
             });
+
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.dispatchEvent(new Event('authChange'));
+                navigate('/login');
+                return;
+            }
 
             const data = await res.json();
 
@@ -53,7 +70,7 @@ export default function InsertProduct() {
                 navigate('/products');
             }
             else if (res.status === 422) {
-                alert("Product is already added with that barcode.");
+                alert(typeof data === "string" ? data : "Product is already added with that barcode.");
             }
             else {
                 setError(data.error || "Something went wrong. Please try again.");
