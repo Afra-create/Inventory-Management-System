@@ -234,6 +234,3 @@ npm start
 
 ---
 
-## Acknowledgements
-
-Built on top of the open-source [Inventory-Management-System-MERN-CRUD-App](https://github.com/mhy20401/Inventory-Management-System-MERN-CRUD-App) by mhy20401, which provided the basic product CRUD starter. I extended it with JWT authentication, per-user inventory isolation, product search, UI changes and full cloud deployment.
